@@ -33,13 +33,45 @@ export default function LiveMeetingPage() {
   }, [isRecording, elapsedSeconds, setElapsedSeconds]);
 
   const handleStartMeeting = async () => {
-    // TODO: Call IPC to create meeting and start ASR
-    setRecording(true);
+    try {
+      // Create meeting in database
+      const meeting = await window.electronAPI.createMeeting({
+        title: meetingTitle,
+        goal: meetingGoal || undefined,
+        notes: notes || undefined,
+        startTime: new Date().toISOString(),
+        status: 'active',
+      });
+
+      // Start ASR transcription
+      await window.electronAPI.startASR(meeting.id);
+
+      setRecording(true);
+    } catch (error) {
+      console.error('Failed to start meeting:', error);
+      alert('Failed to start meeting. Please check your settings.');
+    }
   };
 
   const handleStopMeeting = async () => {
-    // TODO: Call IPC to stop ASR and finalize meeting
-    setRecording(false);
+    try {
+      // Stop ASR transcription
+      await window.electronAPI.stopASR();
+
+      // Update meeting status
+      if (currentMeeting?.id) {
+        await window.electronAPI.updateMeeting(currentMeeting.id, {
+          status: 'completed',
+          endTime: new Date().toISOString(),
+          durationSeconds: elapsedSeconds,
+        });
+      }
+
+      setRecording(false);
+    } catch (error) {
+      console.error('Failed to stop meeting:', error);
+      setRecording(false);
+    }
   };
 
   return (

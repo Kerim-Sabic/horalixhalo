@@ -10,9 +10,19 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [useCase, setUseCase] = useState<string>('sales');
 
-  const handleComplete = () => {
-    // TODO: Save onboarding completion to settings
-    navigate('/live');
+  const handleComplete = async () => {
+    try {
+      // Save onboarding completion and use case to settings
+      await window.electronAPI.updateSettings({
+        onboardingCompleted: true,
+        useCaseProfile: useCase,
+      });
+      navigate('/live');
+    } catch (error) {
+      console.error('Failed to save onboarding settings:', error);
+      // Navigate anyway to prevent blocking the user
+      navigate('/live');
+    }
   };
 
   return (

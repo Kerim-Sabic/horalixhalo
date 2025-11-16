@@ -100,9 +100,9 @@ export const openaiWhisperProvider: ASRProvider = {
     // Restart chunk interval
     // Would need to call start() again with config
   },
-};
 
-// Method to add audio chunks (would be called from microphone capture)
-export function addAudioChunk(chunk: Buffer): void {
-  audioBuffer.push(chunk);
-}
+  sendAudio(audioChunk: Buffer) {
+    // Buffer audio chunks for periodic processing
+    audioBuffer.push(audioChunk);
+  },
+};

@@ -100,9 +100,9 @@ export const localWhisperProvider: ASRProvider = {
   async resume() {
     // Would restart chunk interval
   },
-};
 
-// Method to add audio chunks
-export function addLocalWhisperAudioChunk(chunk: Buffer): void {
-  audioBuffer.push(chunk);
-}
+  sendAudio(audioChunk: Buffer) {
+    // Buffer audio chunks for periodic processing
+    audioBuffer.push(audioChunk);
+  },
+};

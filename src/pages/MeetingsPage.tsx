@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -8,9 +8,29 @@ import Button from '../components/ui/Button';
 export default function MeetingsPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [meetings, setMeetings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // TODO: Load meetings from database via IPC
-  const meetings = [];
+  // Load meetings from database
+  useEffect(() => {
+    const loadMeetings = async () => {
+      try {
+        const allMeetings = await window.electronAPI.getAllMeetings(100, 0);
+        setMeetings(allMeetings);
+      } catch (error) {
+        console.error('Failed to load meetings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMeetings();
+  }, []);
+
+  // Filter meetings based on search query
+  const filteredMeetings = meetings.filter((meeting) =>
+    meeting.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="h-full flex flex-col bg-neutral-50">
@@ -31,7 +51,13 @@ export default function MeetingsPage() {
 
       {/* Meetings list */}
       <div className="flex-1 overflow-y-auto p-6">
-        {meetings.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12 text-neutral-600">Loading meetings...</div>
+        ) : filteredMeetings.length === 0 && searchQuery ? (
+          <div className="text-center py-12">
+            <div className="text-neutral-600">No meetings found matching "{searchQuery}"</div>
+          </div>
+        ) : filteredMeetings.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📋</div>
             <div className="text-lg text-neutral-900 mb-2">No meetings yet</div>
@@ -42,7 +68,7 @@ export default function MeetingsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {meetings.map((meeting: any) => (
+            {filteredMeetings.map((meeting: any) => (
               <Card
                 key={meeting.id}
                 hover

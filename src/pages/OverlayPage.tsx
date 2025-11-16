@@ -12,12 +12,72 @@ export default function OverlayPage() {
     { id: 'actions', label: 'Actions', emoji: '✅', shortcut: 'Ctrl+Alt+A' },
   ];
 
-  const handleAction = (actionId: string) => {
-    // TODO: Trigger IPC call for AI action
-    setResult({
-      title: `${actionId} result`,
-      body: 'AI response will appear here',
-    });
+  const handleAction = async (actionId: string) => {
+    try {
+      setResult({
+        title: `${actionId}...`,
+        body: 'Generating AI response...',
+        timestamp: new Date().toISOString(),
+      });
+
+      let response: any;
+      const input = {
+        latestSegments: [], // Would be populated from live meeting state
+        useCaseProfile: 'sales', // Would come from settings
+      };
+
+      switch (actionId) {
+        case 'say':
+          response = await window.electronAPI.suggestReply(input);
+          setResult({
+            title: 'Suggested Reply',
+            body: response.suggestions?.[0] || 'No suggestions available',
+            timestamp: new Date().toISOString(),
+          });
+          break;
+
+        case 'followup':
+          response = await window.electronAPI.generateFollowup(input);
+          setResult({
+            title: 'Follow-up Questions',
+            body: response.questions?.join('\n• ') || 'No questions available',
+            timestamp: new Date().toISOString(),
+          });
+          break;
+
+        case 'recap':
+          response = await window.electronAPI.generateSummary(input);
+          setResult({
+            title: 'Quick Recap',
+            body: response.shortSummary || 'No summary available',
+            timestamp: new Date().toISOString(),
+          });
+          break;
+
+        case 'actions':
+          response = await window.electronAPI.extractActionItems(input);
+          setResult({
+            title: 'Action Items',
+            body: response.actionItems?.map((a: any) => `• ${a.text}`).join('\n') || 'No actions found',
+            timestamp: new Date().toISOString(),
+          });
+          break;
+
+        default:
+          setResult({
+            title: 'Error',
+            body: 'Unknown action',
+            timestamp: new Date().toISOString(),
+          });
+      }
+    } catch (error) {
+      console.error('AI action failed:', error);
+      setResult({
+        title: 'Error',
+        body: error instanceof Error ? error.message : 'Failed to generate AI response',
+        timestamp: new Date().toISOString(),
+      });
+    }
   };
 
   return (

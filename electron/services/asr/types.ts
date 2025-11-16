@@ -32,4 +32,7 @@ export interface ASRProvider {
   stop: () => Promise<void>;
   pause: () => Promise<void>;
   resume: () => Promise<void>;
+
+  // Send audio chunk to provider (for streaming providers)
+  sendAudio?: (audioChunk: Buffer) => void;
 }

@@ -30,10 +30,7 @@ export const deepgramProvider: ASRProvider = {
 
       ws.on('open', () => {
         logger.info('Deepgram WebSocket connected');
-
-        // TODO: Send audio chunks to WebSocket
-        // This would come from microphone capture
-        // ws.send(audioChunk);
+        // Audio chunks will be sent via sendAudio() method
       });
 
       ws.on('message', (data: WebSocket.Data) => {
@@ -98,5 +95,12 @@ export const deepgramProvider: ASRProvider = {
 
   async resume() {
     // Resume sending audio chunks
+  },
+
+  sendAudio(audioChunk: Buffer) {
+    const ws = (deepgramProvider as any)._ws as WebSocket | undefined;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(audioChunk);
+    }
   },
 };

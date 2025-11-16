@@ -79,8 +79,10 @@ export async function startASR(
       microphone = new MicrophoneCapture();
       await microphone.start(
         (audioChunk) => {
-          // TODO: Send audio chunk to ASR provider
-          // This would pipe audio to WebSocket or buffer for Whisper
+          // Send audio chunk to ASR provider
+          if (provider.sendAudio) {
+            provider.sendAudio(audioChunk);
+          }
         },
         (error) => {
           logger.error('Microphone error:', error);
