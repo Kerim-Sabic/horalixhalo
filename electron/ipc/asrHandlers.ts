@@ -1,17 +1,21 @@
 /**
  * IPC handlers for ASR (Automatic Speech Recognition)
- * Full implementation in Phase 7
  */
 
 import { ipcMain } from 'electron';
 import { logger } from '../utils/logger';
+import { startASR, stopASR, pauseASR, resumeASR } from '../services/asr/asrRouter';
+import { getMainWindow } from '../windows/windowManager';
 
-// Placeholder - will be implemented in Phase 7
 export function registerASRHandlers(): void {
   ipcMain.handle('asr:start', async (_event, meetingId) => {
     try {
       logger.info('ASR start requested for meeting:', meetingId);
-      // TODO: Implement ASR start logic
+      const mainWindow = getMainWindow();
+      if (!mainWindow) {
+        throw new Error('Main window not found');
+      }
+      await startASR(meetingId, mainWindow);
       return { success: true };
     } catch (error) {
       logger.error('Error starting ASR:', error);
@@ -22,7 +26,7 @@ export function registerASRHandlers(): void {
   ipcMain.handle('asr:stop', async () => {
     try {
       logger.info('ASR stop requested');
-      // TODO: Implement ASR stop logic
+      await stopASR();
       return { success: true };
     } catch (error) {
       logger.error('Error stopping ASR:', error);
@@ -33,7 +37,7 @@ export function registerASRHandlers(): void {
   ipcMain.handle('asr:pause', async () => {
     try {
       logger.info('ASR pause requested');
-      // TODO: Implement ASR pause logic
+      await pauseASR();
       return { success: true };
     } catch (error) {
       logger.error('Error pausing ASR:', error);
@@ -44,7 +48,7 @@ export function registerASRHandlers(): void {
   ipcMain.handle('asr:resume', async () => {
     try {
       logger.info('ASR resume requested');
-      // TODO: Implement ASR resume logic
+      await resumeASR();
       return { success: true };
     } catch (error) {
       logger.error('Error resuming ASR:', error);

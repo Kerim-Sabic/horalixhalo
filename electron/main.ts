@@ -26,6 +26,7 @@ import { registerAIUsageHandlers } from './ipc/aiUsageHandlers';
 import { registerASRHandlers } from './ipc/asrHandlers';
 import { registerLLMHandlers } from './ipc/llmHandlers';
 import { setupAppMenu } from './security/appMenu';
+import { startConnectivityMonitoring, stopConnectivityMonitoring } from './services/connectivity/connectivityService';
 
 // Set log level
 if (isDev) {
@@ -86,7 +87,10 @@ if (!gotTheLock) {
     createTray();
 
     // Create main window
-    createMainWindow();
+    const mainWin = createMainWindow();
+
+    // Start connectivity monitoring
+    startConnectivityMonitoring(mainWin);
 
     // On macOS, re-create window when dock icon is clicked
     app.on('activate', () => {
@@ -109,6 +113,9 @@ if (!gotTheLock) {
 
     // Unregister global shortcuts
     globalShortcut.unregisterAll();
+
+    // Stop connectivity monitoring
+    stopConnectivityMonitoring();
 
     // Close database
     closeDatabase();
